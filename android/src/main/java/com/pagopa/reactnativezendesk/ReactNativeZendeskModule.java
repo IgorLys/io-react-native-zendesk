@@ -12,6 +12,9 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
 
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -247,19 +250,32 @@ public class ReactNativeZendeskModule extends ReactContextBaseJavaModule impleme
   @ReactMethod
   public void getTickets(final Promise promise){
     requestProvider = Support.INSTANCE.provider().requestProvider();
-    public void onSuccess(List<Request> requests) {
+     requestProvider.getAllRequests(new ZendeskCallback<List<Request>>() {
+      @Override
+      public void onSuccess(List<Request> requests) {
             WritableArray ticketsArray = Arguments.createArray();
             for (Request request : requests) {
                 WritableMap ticketMap = Arguments.createMap();
                 ticketMap.putString("id", request.getId());
-                ticketMap.putString("status", request.getStatus());
+                ticketMap.putString("status", request.getStatus().name());
                 ticketMap.putString("subject", request.getSubject());
                 ticketMap.putString("description", request.getDescription());
+                ticketMap.putString("createdAt", request.getCreatedAt().toString());
+                ticketMap.putString("updatedAt", request.getUpdatedAt().toString());
+                ticketMap.putString("firstComment", request.getFirstComment().getBody());
+                ticketMap.putString("lastComment", request.getLastComment().getBody());
+                ticketMap.putInt("commentCount", request.getCommentCount());
 
                 ticketsArray.pushMap(ticketMap);
             }
             promise.resolve(ticketsArray);
         }
+      @Override
+      public void onError(ErrorResponse errorResponse) {
+        // Handle error
+        promise.reject(errorResponse.getReason());
+      }
+    });
   }
 
   @ReactMethod
