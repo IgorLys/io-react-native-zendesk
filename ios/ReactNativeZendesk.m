@@ -190,6 +190,44 @@ RCT_EXPORT_METHOD(hasOpenedTickets:(RCTPromiseResolveBlock)resolve rejecter:(RCT
         resolve(ticketsCount);
     }];
 }
+RCT_EXPORT_METHOD(getTickets:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    ZDKRequestProvider *provider = [ZDKRequestProvider new];
+    [provider getAllRequestsWithCallback:^(ZDKRequestsWithCommentingAgents *requestsWithCommentingAgents, NSError *error) {
+        if (error != nil) {
+            reject(@"GET_TICKETS_ERROR", error.localizedDescription, nil);
+            return;
+        }
+
+        NSMutableArray *ticketsArray = [NSMutableArray new];
+
+        for (ZDKRequest *request in requestsWithCommentingAgents.requests) {
+            NSMutableDictionary *ticketDict = [NSMutableDictionary new];
+            ticketDict[@"id"] = request.requestId;
+            ticketDict[@"status"] = request.status;
+            ticketDict[@"subject"] = request.subject;
+            ticketDict[@"description"] = request.requestDescription;
+            ticketDict[@"createdAt"] = request.createdAt;
+            ticketDict[@"updatedAt"] = request.updatedAt;
+            ticketDict[@"commentCount"] = @(request.commentCount);
+
+            // Fetch first and last comment details
+            NSArray<ZDKComment *> *comments = request.lastCommentingAgents;
+            if (comments.count > 0) {
+                ZDKComment *firstComment = comments.firstObject;
+                ZDKComment *lastComment = comments.lastObject;
+
+                ticketDict[@"firstComment"] = firstComment.body ?: @"";
+
+                ticketDict[@"lastComment"] = lastComment.body ?: @"";
+            }
+
+            [ticketsArray addObject:ticketDict];
+        }
+
+        resolve(ticketsArray);
+    }];
+}
 RCT_EXPORT_METHOD(getTotalNewResponses:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
 {
     ZDKRequestProvider * provider = [ZDKRequestProvider new];
@@ -254,7 +292,7 @@ RCT_EXPORT_METHOD(getTotalNewResponses:(RCTPromiseResolveBlock)resolve rejecter:
     currentController = topController;
     NavigationControllerWithCompletion *navControl = [[NavigationControllerWithCompletion alloc] initWithRootViewController: openTicketController];
     navControl.completion = onClose;
-    
+
     [topController presentViewController:navControl animated:YES completion:nil];
   }
 - (void) showTicketsFunction:(RCTResponseSenderBlock)onClose {
