@@ -1,13 +1,13 @@
-# @pagopa/io-react-native-zendesk
+# @igorlys/io-react-native-zendesk
 
 A react-native wrapper for Zendesk Unified SDK
 
-This library is based and originally forked by https://github.com/Saranshmalik/react-native-zendesk/ and then modified to be developed as an integrated react-native module.
+This library is based and originally forked by https://github.com/pagopa/io-react-native-zendesk/ and then modified to be developed as an integrated react-native module.
 
 ## Installation
 
 ```sh
-yarn add @pagopa/io-react-native-zendesk
+yarn add @igorlys/io-react-native-zendesk
 ```
 
 #### iOS
