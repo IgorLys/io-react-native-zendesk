@@ -82,7 +82,7 @@ public class ReactNativeZendeskModule extends ReactContextBaseJavaModule impleme
     onOpenTicketDismiss = null;
     reactContext.addActivityEventListener(this);
   }
-  
+
   @Override
   @NonNull
   public String getName() {
@@ -245,6 +245,29 @@ public class ReactNativeZendeskModule extends ReactContextBaseJavaModule impleme
   }
 
   @ReactMethod
+  public void getTickets(final Promise promise){
+    requestProvider = Support.INSTANCE.provider().requestProvider();
+    public void onSuccess(List<Request> requests) {
+            WritableArray ticketsArray = Arguments.createArray();
+            for (Request request : requests) {
+                WritableMap ticketMap = Arguments.createMap();
+                ticketMap.putString("id", request.getId());
+                ticketMap.putString("status", request.getStatus());
+                ticketMap.putString("subject", request.getSubject());
+                ticketMap.putString("description", request.getDescription());
+                ticketMap.putString("createdAt", request.getCreatedAt().toString());
+                ticketMap.putString("updatedAt", request.getUpdatedAt().toString());
+                ticketMap.putString("lastComment", request.getLastComment().getBody());
+                ticketMap.putString("firstComment", request.getFirstComment().getBody());
+                ticketMap.putInt("commentCount", request.getCommentCount());
+
+                ticketsArray.pushMap(ticketMap);
+            }
+            promise.resolve(ticketsArray);
+        }
+  }
+
+  @ReactMethod
   public void getTotalNewResponses(final Promise promise){
     requestProvider = Support.INSTANCE.provider().requestProvider();
 
@@ -278,7 +301,7 @@ public class ReactNativeZendeskModule extends ReactContextBaseJavaModule impleme
   public void dismiss() {
     Activity activity = getCurrentActivity();
     if (activity != null) {
-      activity.finishActivity(INTENT_REQUEST_CODE);  
+      activity.finishActivity(INTENT_REQUEST_CODE);
     }
   }
 
