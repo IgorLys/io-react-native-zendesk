@@ -255,11 +255,6 @@ public class ReactNativeZendeskModule extends ReactContextBaseJavaModule impleme
                 ticketMap.putString("status", request.getStatus());
                 ticketMap.putString("subject", request.getSubject());
                 ticketMap.putString("description", request.getDescription());
-                ticketMap.putString("createdAt", request.getCreatedAt().toString());
-                ticketMap.putString("updatedAt", request.getUpdatedAt().toString());
-                ticketMap.putString("lastComment", request.getLastComment().getBody());
-                ticketMap.putString("firstComment", request.getFirstComment().getBody());
-                ticketMap.putInt("commentCount", request.getCommentCount());
 
                 ticketsArray.pushMap(ticketMap);
             }
