@@ -186,6 +186,7 @@ RCT_EXPORT_METHOD(hasOpenedTickets:(RCTPromiseResolveBlock)resolve rejecter:(RCT
             reject(@"event_failure", @"no response", nil);
             return;
         }
+
         NSNumber *ticketsCount = [NSNumber numberWithInt:[requestsWithCommentingAgents requests].count];
         resolve(ticketsCount);
     }];
@@ -207,20 +208,11 @@ RCT_EXPORT_METHOD(getTickets:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromis
             ticketDict[@"status"] = request.status;
             ticketDict[@"subject"] = request.subject;
             ticketDict[@"description"] = request.requestDescription;
-            ticketDict[@"createdAt"] = request.createdAt;
-            ticketDict[@"updatedAt"] = request.updatedAt;
-            ticketDict[@"commentCount"] = @(request.commentCount);
-
-            // Fetch first and last comment details
-            NSArray<ZDKComment *> *comments = request.lastCommentingAgents;
-            if (comments.count > 0) {
-                ZDKComment *firstComment = comments.firstObject;
-                ZDKComment *lastComment = comments.lastObject;
-
-                ticketDict[@"firstComment"] = firstComment.body ?: @"";
-
-                ticketDict[@"lastComment"] = lastComment.body ?: @"";
-            }
+            ticketDict[@"createdAt"] = request.createdAt ? request.createdAt : @"N/A";
+            ticketDict[@"updatedAt"] = request.updateAt ? request.updateAt : @"N/A";
+            ticketDict[@"commentCount"] = request.commentCount;
+            ticketDict[@"firstComment"] = request.firstComment ? request.firstComment : @"N/A";
+            ticketDict[@"lastComment"] = request.lastComment ? request.lastComment : @"N/A";
 
             [ticketsArray addObject:ticketDict];
         }
