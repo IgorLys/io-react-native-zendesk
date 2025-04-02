@@ -43,6 +43,16 @@ export interface InitOptions {
   logId: string;
 }
 
+export interface Ticket {
+  id: number;
+  description: string;
+  priority: string | null;
+  subject: string;
+  createdAt: string;
+  updatedAt: string;
+  lastCommentId: number;
+}
+
 interface UserInfo extends AnonymousIdentity {
   // user's phone
   phone?: number;
@@ -61,18 +71,6 @@ export interface AnonymousIdentity {
   name?: string;
   // user's email
   email?: string;
-}
-
-export interface Request {
-  id: string;
-  status: string;
-  subject: string;
-  description: string;
-  createdAt: string;
-  updatedAt: string;
-  lastComment: string;
-  firstComment: string;
-  commentCount: number;
 }
 
 // normal init function when you want to use all of the sdks
@@ -141,13 +139,8 @@ export function showTickets(onClose: () => void): void {
 }
 
 // function that return the number of tickets created by the user
-export function hasOpenedTickets(): Promise<number> {
+export function hasOpenedTickets(): Promise<Ticket[]> {
   return ReactNativeZendesk.hasOpenedTickets();
-}
-
-// function that return the array of tickets created by the user
-export function getTickets(): Promise<Request[]> {
-  return ReactNativeZendesk.getTickets();
 }
 
 // function that return the number of unread messages by the user
@@ -190,7 +183,6 @@ class IoReactNativeZendesk {
   static openTicket = openTicket;
   static showTickets = showTickets;
   static hasOpenedTickets = hasOpenedTickets;
-  static getTickets = getTickets;
   static getTotalNewResponses = getTotalNewResponses;
   static setVisitorInfo = setVisitorInfo;
   static setNotificationToken = setNotificationToken;

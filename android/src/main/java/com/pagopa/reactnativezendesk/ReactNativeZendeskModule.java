@@ -12,10 +12,10 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 
 import com.facebook.react.bridge.Callback;
+
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
-import com.facebook.react.bridge.Arguments;
-
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContext;
@@ -40,6 +40,7 @@ import zendesk.chat.PushNotificationsProvider;
 import zendesk.chat.Providers;
 import zendesk.chat.VisitorInfo;
 import zendesk.core.JwtIdentity;
+import zendesk.core.PushRegistrationProvider;
 import zendesk.core.AnonymousIdentity;
 import zendesk.core.Identity;
 import zendesk.classic.messaging.MessagingActivity;
@@ -236,40 +237,31 @@ public class ReactNativeZendeskModule extends ReactContextBaseJavaModule impleme
     requestProvider.getAllRequests(new ZendeskCallback<List<Request>>() {
       @Override
       public void onSuccess(List<Request> requests) {
-        // Handle success
-        promise.resolve(requests.size());
-      }
-      @Override
-      public void onError(ErrorResponse errorResponse) {
-        // Handle error
-        promise.reject(errorResponse.getReason());
-      }
-    });
-  }
 
-  @ReactMethod
-  public void getTickets(final Promise promise){
-    requestProvider = Support.INSTANCE.provider().requestProvider();
-     requestProvider.getAllRequests(new ZendeskCallback<List<Request>>() {
-      @Override
-      public void onSuccess(List<Request> requests) {
-            WritableArray ticketsArray = Arguments.createArray();
-            for (Request request : requests) {
-                WritableMap ticketMap = Arguments.createMap();
-                ticketMap.putString("id", request.getId());
-                ticketMap.putString("status", request.getStatus().name());
-                ticketMap.putString("subject", request.getSubject());
-                ticketMap.putString("description", request.getDescription());
-                ticketMap.putString("createdAt", request.getCreatedAt().toString());
-                ticketMap.putString("updatedAt", request.getUpdatedAt().toString());
-                ticketMap.putString("firstComment", request.getFirstComment().getBody());
-                ticketMap.putString("lastComment", request.getLastComment().getBody());
-                ticketMap.putInt("commentCount", request.getCommentCount());
+        WritableArray requestArray = Arguments.createArray();
 
-                ticketsArray.pushMap(ticketMap);
+        for (Request request : requests) {
+                WritableMap requestMap = Arguments.createMap();
+
+                Log.d(TAG, "Request ID: " + request.getId());
+                Log.d(TAG, "Request Subject: " + request.getSubject());
+                Log.d(TAG, "Request Status: " + request.getStatus());
+                Log.d(TAG, "Request Priority: " + request.getPriority());
+                Log.d(TAG, "Request Created At: " + request.getDueAt());
+                Log.d(TAG, "Request Created At: " + request.getCreatedAt());
+                Log.d(TAG, "Request Updated At: " + request.getUpdatedAt());
+                Log.d(TAG, "Request Description: " + request.getDescription());
+                Log.d(TAG, "---------------------------");
+
+                requestMap.putString("id", request.getId());
+                requestMap.putString("lastCommentId", request.getLastComment().getId().toString());
+
+                requestArray.pushMap(requestMap);
             }
-            promise.resolve(ticketsArray);
-        }
+
+        // Handle success
+        promise.resolve(requestArray);
+      }
       @Override
       public void onError(ErrorResponse errorResponse) {
         // Handle error
@@ -279,21 +271,43 @@ public class ReactNativeZendeskModule extends ReactContextBaseJavaModule impleme
   }
 
   @ReactMethod
-  public void getTotalNewResponses(final Promise promise){
+public void getTotalNewResponses(final Promise promise) {
     requestProvider = Support.INSTANCE.provider().requestProvider();
 
     requestProvider.getUpdatesForDevice(new ZendeskCallback<RequestUpdates>() {
-      @Override
-      public void onSuccess(RequestUpdates requestUpdates) {
-        promise.resolve(requestUpdates.totalUpdates());
-      }
+        @Override
+        public void onSuccess(RequestUpdates requestUpdates) {
+            int totalUpdates = requestUpdates.totalUpdates();
+            Log.d("Zendesk", "Total Updates: " + totalUpdates);
 
-      @Override
-      public void onError(ErrorResponse errorResponse) {
-        promise.reject(errorResponse.getReason());
-      }
+            // Fetch all requests separately
+            requestProvider.getAllRequests(new ZendeskCallback<List<Request>>() {
+                @Override
+                public void onSuccess(List<Request> requests) {
+                    for (Request request : requests) {
+                        Log.d("Zendesk", "Request ID: " + request.getId());
+                        Log.d("Zendesk", "Subject: " + request.getSubject());
+                        Log.d("Zendesk", "Status: " + request.getStatus());
+                        Log.d("Zendesk", "Last Updated: " + request.getUpdatedAt());
+                    }
+                }
+
+                @Override
+                public void onError(ErrorResponse errorResponse) {
+                    Log.e("Zendesk", "Error fetching requests: " + errorResponse.getReason());
+                }
+            });
+
+            promise.resolve(totalUpdates);
+        }
+
+        @Override
+        public void onError(ErrorResponse errorResponse) {
+            Log.e("Zendesk", "Error fetching updates: " + errorResponse.getReason());
+            promise.reject(errorResponse.getReason());
+        }
     });
-  }
+}
 
   @ReactMethod
   public void showTickets(Callback onClose){
@@ -319,9 +333,20 @@ public class ReactNativeZendeskModule extends ReactContextBaseJavaModule impleme
 
   @ReactMethod
   public void setNotificationToken(String token) {
-    PushNotificationsProvider pushProvider = Chat.INSTANCE.providers().pushNotificationsProvider();
+    PushRegistrationProvider pushProvider = Zendesk.INSTANCE.provider().pushRegistrationProvider();
     if (pushProvider != null) {
-      pushProvider.registerPushToken(token);
+      Log.d("ONESIGNALDEVICEID", "push provider is active");
+      pushProvider.registerWithDeviceIdentifier(token, new ZendeskCallback<String>() {
+    @Override
+    public void onSuccess(String result) {
+      Log.d("ONESIGNALDEVICEID", "success $result");
+    }
+
+    @Override
+    public void onError(ErrorResponse errorResponse) {
+      Log.d("ONESIGNALDEVICEID", "error $errorResponse");
+    }
+});
     }
   }
 
