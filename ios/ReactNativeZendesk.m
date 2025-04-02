@@ -50,9 +50,9 @@ RCT_EXPORT_METHOD(chatConfiguration: (NSDictionary *)options) {
     }
 }
 
-RCT_EXPORT_METHOD(openTicket:(RCTResponseSenderBlock)onClose) {
+RCT_EXPORT_METHOD(openTicket:(NSString *)ticketId onClose:(RCTResponseSenderBlock)onClose) {
     [self executeOnMainThread:^{
-        [self openTicketFunction:onClose];
+        [self openTicketFunction:ticketId onClose:onClose];
     }];
 }
 RCT_EXPORT_METHOD(showTickets:(RCTResponseSenderBlock)onClose) {
@@ -194,23 +194,38 @@ RCT_EXPORT_METHOD(hasOpenedTickets:(RCTPromiseResolveBlock)resolve rejecter:(RCT
         NSMutableArray *requestArray = [NSMutableArray array];
 
         for (ZDKRequest *request in requests) {
-            NSLog(@"---------------------------");
-            NSLog(@"Request ID: %@", request.requestId);
-            NSLog(@"Request Subject: %@", request.subject);
-            NSLog(@"Request Status: %@", request.status);
-            NSLog(@"Request Created At: %@", request.createdAt);
-            NSLog(@"Request Updated At: %@", request.updateAt);
-            NSLog(@"Request Description: %@", request.requestDescription);
+            NSMutableDictionary *requestDict = [NSMutableDictionary dictionary];
 
-            NSDictionary *requestDict = @{
-                @"id": request.requestId ?: @"",
-                @"lastCommentId": request.lastComment.commentId.stringValue ?: @""
-            };
+            // Extract request details
+            requestDict[@"id"] = request.requestId ?: @"";
+            requestDict[@"subject"] = request.subject ?: @"";
+            requestDict[@"status"] = request.status ?: @"";
+            requestDict[@"createdAt"] = request.createdAt ? request.createdAt.description : @"";
+            requestDict[@"updatedAt"] = request.updateAt ? request.updateAt.description : @"";
+            requestDict[@"description"] = request.requestDescription ?: @"";
+
+            // Last comment info
+            if (request.lastComment) {
+                NSMutableDictionary *lastCommentDict = [NSMutableDictionary dictionary];
+                lastCommentDict[@"id"] = request.lastComment.commentId.stringValue ?: @"";
+                lastCommentDict[@"body"] = request.lastComment.body ?: @"";
+                lastCommentDict[@"authorId"] = request.lastComment.authorId.stringValue ?: @"";
+                lastCommentDict[@"createdAt"] = request.lastComment.createdAt ? request.lastComment.createdAt.description : @"";
+                requestDict[@"lastComment"] = lastCommentDict;
+            }
+
+            // Requester & Assignee IDs
+            if (request.requesterId) {
+                requestDict[@"requesterId"] = request.requesterId;
+            }
+
+            // Log for debugging
+            NSLog(@"Request Data: %@", requestDict);
 
             [requestArray addObject:requestDict];
         }
 
-        NSNumber *ticketsCount = @(requests.count);
+        // Resolve promise with array of requests
         resolve(requestArray);
     }];
 }
@@ -260,23 +275,35 @@ RCT_EXPORT_METHOD(getTotalNewResponses:(RCTPromiseResolveBlock)resolve rejecter:
     UINavigationController *navControl = [[UINavigationController alloc] initWithRootViewController: controller];
     [topController presentViewController:navControl animated:YES completion:nil];
 }
-- (void) openTicketFunction:(RCTResponseSenderBlock)onClose {
+- (void) openTicketFunction:(NSString *)ticketId onClose:(RCTResponseSenderBlock)onClose {
     [self initGlobals];
 
-    ZDKRequestUiConfiguration * config = [ZDKRequestUiConfiguration new];
-    config.tags = tags;
+    UIViewController *openTicketController;
 
-    UIViewController *openTicketController = [ZDKRequestUi buildRequestUiWith:@[config]];
+    if (ticketId != nil && ticketId.length > 0) {
+        // Open a specific ticket using the ticket ID
+        openTicketController = [ZDKRequestUi buildRequestUiWithRequestId:ticketId];
+    } else {
+        // Open new ticket creation screen
+        ZDKRequestUiConfiguration *config = [ZDKRequestUiConfiguration new];
+        config.tags = tags;
+        openTicketController = [ZDKRequestUi buildRequestUiWith:@[config]];
+    }
+
+    // Get the top-most view controller
     UIViewController *topController = [UIApplication sharedApplication].keyWindow.rootViewController;
     while (topController.presentedViewController) {
         topController = topController.presentedViewController;
     }
     currentController = topController;
-    NavigationControllerWithCompletion *navControl = [[NavigationControllerWithCompletion alloc] initWithRootViewController: openTicketController];
+
+    // Wrap in Navigation Controller
+    NavigationControllerWithCompletion *navControl = [[NavigationControllerWithCompletion alloc] initWithRootViewController:openTicketController];
     navControl.completion = onClose;
 
+    // Present the Zendesk ticket screen
     [topController presentViewController:navControl animated:YES completion:nil];
-  }
+}
 - (void) showTicketsFunction:(RCTResponseSenderBlock)onClose {
     ZDKRequestListUiConfiguration * config = [ZDKRequestListUiConfiguration new];
     config.allowRequestCreation = false;
