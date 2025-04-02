@@ -45,12 +45,17 @@ export interface InitOptions {
 
 export interface Ticket {
   id: string;
-  description: string;
-  priority: string | null;
+  status: string;
   subject: string;
+  description: string;
   createdAt: string;
   updatedAt: string;
-  lastCommentId: string;
+  lastComment: {
+    authorId: string;
+    body: string;
+    createdAt: string;
+    id: string;
+  };
 }
 
 interface UserInfo extends AnonymousIdentity {
@@ -129,8 +134,8 @@ export function dismiss(): void {
 }
 
 // function to open a ticket
-export function openTicket(onClose: () => void): void {
-  ReactNativeZendesk.openTicket(onClose);
+export function openTicket(ticketId: string, onClose: () => void): void {
+  ReactNativeZendesk.openTicket(ticketId, onClose);
 }
 
 // function to shows all the tickets of the user

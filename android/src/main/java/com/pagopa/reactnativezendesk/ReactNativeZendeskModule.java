@@ -212,7 +212,7 @@ public class ReactNativeZendeskModule extends ReactContextBaseJavaModule impleme
   }
 
   @ReactMethod
-  public void openTicket(Callback onClose){
+  public void openTicket(String tickedId, Callback onClose){
     Activity activity = getCurrentActivity();
 
     onOpenTicketDismiss = onClose;
@@ -224,6 +224,7 @@ public class ReactNativeZendeskModule extends ReactContextBaseJavaModule impleme
 
     // Open a ticket
     Intent requestActivityIntent = RequestActivity.builder()
+      .withRequestId(tickedId)
       .withCustomFields(new ArrayList(customFields.values()))
       .withTags(this.tags)
       .intent(activity);
@@ -232,43 +233,58 @@ public class ReactNativeZendeskModule extends ReactContextBaseJavaModule impleme
   }
 
   @ReactMethod
-  public void hasOpenedTickets(final Promise promise){
+public void hasOpenedTickets(final Promise promise) {
     requestProvider = Support.INSTANCE.provider().requestProvider();
+
     requestProvider.getAllRequests(new ZendeskCallback<List<Request>>() {
-      @Override
-      public void onSuccess(List<Request> requests) {
+        @Override
+        public void onSuccess(List<Request> requests) {
+            WritableArray requestArray = Arguments.createArray();
 
-        WritableArray requestArray = Arguments.createArray();
-
-        for (Request request : requests) {
+            for (Request request : requests) {
                 WritableMap requestMap = Arguments.createMap();
 
-                Log.d(TAG, "Request ID: " + request.getId());
-                Log.d(TAG, "Request Subject: " + request.getSubject());
-                Log.d(TAG, "Request Status: " + request.getStatus());
-                Log.d(TAG, "Request Priority: " + request.getPriority());
-                Log.d(TAG, "Request Created At: " + request.getDueAt());
-                Log.d(TAG, "Request Created At: " + request.getCreatedAt());
-                Log.d(TAG, "Request Updated At: " + request.getUpdatedAt());
-                Log.d(TAG, "Request Description: " + request.getDescription());
-                Log.d(TAG, "---------------------------");
-
+                // Extract request details
                 requestMap.putString("id", request.getId());
-                requestMap.putString("lastCommentId", request.getLastComment().getId().toString());
+                requestMap.putString("subject", request.getSubject());
+                requestMap.putString("status", request.getStatus().name());
+
+                if (request.getCreatedAt() != null) {
+                    requestMap.putString("createdAt", request.getCreatedAt().toString());
+                }
+                if (request.getUpdatedAt() != null) {
+                    requestMap.putString("updatedAt", request.getUpdatedAt().toString());
+                }
+                if (request.getDescription() != null) {
+                    requestMap.putString("description", request.getDescription());
+                }
+
+                // Last comment info
+                if (request.getLastComment() != null) {
+                    WritableMap lastCommentMap = Arguments.createMap();
+                    lastCommentMap.putString("id", request.getLastComment().getId().toString());
+                    lastCommentMap.putString("body", request.getLastComment().getBody());
+                    lastCommentMap.putString("authorId", request.getLastComment().getAuthorId().toString());
+                    lastCommentMap.putString("createdAt", request.getLastComment().getCreatedAt().toString());
+                    requestMap.putMap("lastComment", lastCommentMap);
+                }
+
+                // Log for debugging
+                Log.d(TAG, "Request Data: " + requestMap.toString());
 
                 requestArray.pushMap(requestMap);
             }
 
-        // Handle success
-        promise.resolve(requestArray);
-      }
-      @Override
-      public void onError(ErrorResponse errorResponse) {
-        // Handle error
-        promise.reject(errorResponse.getReason());
-      }
+            // Resolve promise with array of requests
+            promise.resolve(requestArray);
+        }
+
+        @Override
+        public void onError(ErrorResponse errorResponse) {
+            promise.reject(errorResponse.getReason());
+        }
     });
-  }
+}
 
   @ReactMethod
 public void getTotalNewResponses(final Promise promise) {
