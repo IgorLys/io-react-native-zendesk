@@ -174,7 +174,7 @@ RCT_EXPORT_METHOD(setPrimaryColor:(NSString *)color) {
 }
 RCT_EXPORT_METHOD(setNotificationToken:(NSData *)deviceToken) {
   dispatch_sync(dispatch_get_main_queue(), ^{
-    [self registerForNotifications:deviceToken];
+      [self registerForNotifications:deviceToken];
   });
 }
 
@@ -182,42 +182,36 @@ RCT_EXPORT_METHOD(hasOpenedTickets:(RCTPromiseResolveBlock)resolve rejecter:(RCT
 {
     ZDKRequestProvider *provider = [ZDKRequestProvider new];
     [provider getAllRequestsWithCallback:^(ZDKRequestsWithCommentingAgents *requestsWithCommentingAgents, NSError *error) {
-        if(error != nil){
+        if (error != nil) {
+            NSLog(@"Error fetching requests: %@", error.localizedDescription);
             reject(@"event_failure", @"no response", nil);
             return;
         }
 
-        NSNumber *ticketsCount = [NSNumber numberWithInt:[requestsWithCommentingAgents requests].count];
-        resolve(ticketsCount);
-    }];
-}
-RCT_EXPORT_METHOD(getTickets:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
-{
-    ZDKRequestProvider *provider = [ZDKRequestProvider new];
-    [provider getAllRequestsWithCallback:^(ZDKRequestsWithCommentingAgents *requestsWithCommentingAgents, NSError *error) {
-        if (error != nil) {
-            reject(@"GET_TICKETS_ERROR", error.localizedDescription, nil);
-            return;
+        NSArray<ZDKRequest *> *requests = [requestsWithCommentingAgents requests];
+        NSLog(@"Total Requests: %lu", (unsigned long)requests.count);
+
+        NSMutableArray *requestArray = [NSMutableArray array];
+
+        for (ZDKRequest *request in requests) {
+            NSLog(@"---------------------------");
+            NSLog(@"Request ID: %@", request.requestId);
+            NSLog(@"Request Subject: %@", request.subject);
+            NSLog(@"Request Status: %@", request.status);
+            NSLog(@"Request Created At: %@", request.createdAt);
+            NSLog(@"Request Updated At: %@", request.updateAt);
+            NSLog(@"Request Description: %@", request.requestDescription);
+
+            NSDictionary *requestDict = @{
+                @"id": request.requestId ?: @"",
+                @"lastCommentId": request.lastComment.commentId.stringValue ?: @""
+            };
+
+            [requestArray addObject:requestDict];
         }
 
-        NSMutableArray *ticketsArray = [NSMutableArray new];
-
-        for (ZDKRequest *request in requestsWithCommentingAgents.requests) {
-            NSMutableDictionary *ticketDict = [NSMutableDictionary new];
-            ticketDict[@"id"] = request.requestId;
-            ticketDict[@"status"] = request.status;
-            ticketDict[@"subject"] = request.subject;
-            ticketDict[@"description"] = request.requestDescription;
-            ticketDict[@"createdAt"] = request.createdAt ? request.createdAt : @"N/A";
-            ticketDict[@"updatedAt"] = request.updateAt ? request.updateAt : @"N/A";
-            ticketDict[@"commentCount"] = request.commentCount;
-            ticketDict[@"firstComment"] = request.firstComment ? request.firstComment : @"N/A";
-            ticketDict[@"lastComment"] = request.lastComment ? request.lastComment : @"N/A";
-
-            [ticketsArray addObject:ticketDict];
-        }
-
-        resolve(ticketsArray);
+        NSNumber *ticketsCount = @(requests.count);
+        resolve(requestArray);
     }];
 }
 RCT_EXPORT_METHOD(getTotalNewResponses:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
@@ -268,12 +262,8 @@ RCT_EXPORT_METHOD(getTotalNewResponses:(RCTPromiseResolveBlock)resolve rejecter:
 }
 - (void) openTicketFunction:(RCTResponseSenderBlock)onClose {
     [self initGlobals];
-    if(logId != nil){
-        [self addTicketCustomFieldFunction:logId  withValue:mutableLog];
-    }
 
     ZDKRequestUiConfiguration * config = [ZDKRequestUiConfiguration new];
-    config.customFields = customFields.allValues;
     config.tags = tags;
 
     UIViewController *openTicketController = [ZDKRequestUi buildRequestUiWith:@[config]];
