@@ -44,13 +44,13 @@ export interface InitOptions {
 }
 
 export interface Ticket {
-  id: number;
+  id: string;
   description: string;
   priority: string | null;
   subject: string;
   createdAt: string;
   updatedAt: string;
-  lastCommentId: number;
+  lastCommentId: string;
 }
 
 interface UserInfo extends AnonymousIdentity {
