@@ -199,7 +199,7 @@ RCT_EXPORT_METHOD(hasOpenedTickets:(RCTPromiseResolveBlock)resolve rejecter:(RCT
             // Extract request details
             requestDict[@"id"] = request.requestId ?: @"";
             requestDict[@"subject"] = request.subject ?: @"";
-            requestDict[@"status"] = request.status ?: @"";
+            requestDict[@"status"] = [request.status ?: @"" capitalizedString];
             requestDict[@"createdAt"] = request.createdAt ? request.createdAt.description : @"";
             requestDict[@"updatedAt"] = request.updateAt ? request.updateAt.description : @"";
             requestDict[@"description"] = request.requestDescription ?: @"";
