@@ -1,6 +1,6 @@
 {
   "name": "@igorlysenko/io-react-native-zendesk",
-  "version": "0.3.36",
+  "version": "0.3.37",
   "description": "A react-native wrapper for Zendesk Unified SDK",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
