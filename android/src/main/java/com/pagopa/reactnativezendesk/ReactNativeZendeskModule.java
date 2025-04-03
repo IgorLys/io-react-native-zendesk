@@ -260,6 +260,15 @@ public void hasOpenedTickets(final Promise promise) {
                     requestMap.putString("description", request.getDescription());
                 }
 
+                 if (request.getFirstComment() != null) {
+                    WritableMap firstCommentMap = Arguments.createMap();
+                    FirstCommentMap.putString("id", request.getFirstComment().getId().toString());
+                    FirstCommentMap.putString("body", request.getFirstComment().getBody());
+                    FirstCommentMap.putString("authorId", request.getFirstComment().getAuthorId().toString());
+                    FirstCommentMap.putString("createdAt", request.getFirstComment().getCreatedAt().toString());
+                    requestMap.putMap("firstComment", firstCommentMap);
+                }
+
                 // Last comment info
                 if (request.getLastComment() != null) {
                     WritableMap lastCommentMap = Arguments.createMap();
