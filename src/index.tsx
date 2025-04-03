@@ -45,6 +45,7 @@ export interface InitOptions {
 
 export interface Ticket {
   id: string;
+  requesterId: number;
   status: string;
   subject: string;
   description: string;

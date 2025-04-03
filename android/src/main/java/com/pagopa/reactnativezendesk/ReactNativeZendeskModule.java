@@ -248,6 +248,7 @@ public void hasOpenedTickets(final Promise promise) {
                 requestMap.putString("id", request.getId());
                 requestMap.putString("subject", request.getSubject());
                 requestMap.putString("status", request.getStatus().name());
+                requestMap.putDouble("requesterId", request.getRequesterId());
 
                 if (request.getCreatedAt() != null) {
                     requestMap.putString("createdAt", request.getCreatedAt().toString());
