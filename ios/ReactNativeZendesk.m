@@ -203,6 +203,7 @@ RCT_EXPORT_METHOD(hasOpenedTickets:(RCTPromiseResolveBlock)resolve rejecter:(RCT
             requestDict[@"createdAt"] = request.createdAt ? request.createdAt.description : @"";
             requestDict[@"updatedAt"] = request.updateAt ? request.updateAt.description : @"";
             requestDict[@"description"] = request.requestDescription ?: @"";
+            requestDict[@"requesterId"] = request.requesterId ?: @"";
 
             // Last comment info
             if (request.lastComment) {
