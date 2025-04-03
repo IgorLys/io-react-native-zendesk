@@ -205,6 +205,16 @@ RCT_EXPORT_METHOD(hasOpenedTickets:(RCTPromiseResolveBlock)resolve rejecter:(RCT
             requestDict[@"description"] = request.requestDescription ?: @"";
             requestDict[@"requesterId"] = request.requesterId ?: @"";
 
+            if (request.firstComment) {
+                NSMutableDictionary *firstCommentDict = [NSMutableDictionary dictionary];
+                firstCommentDict[@"id"] = request.firstComment.commentId.stringValue ?: @"";
+                firstCommentDict[@"body"] = request.firstComment.body ?: @"";
+                firstCommentDict[@"authorId"] = request.firstComment.authorId.stringValue ?: @"";
+                firstCommentDict[@"createdAt"] = request.firstComment.createdAt ? request.firstComment.createdAt.description : @"";
+                requestDict[@"firstComment"] = firstCommentDict;
+            }
+
+
             // Last comment info
             if (request.lastComment) {
                 NSMutableDictionary *lastCommentDict = [NSMutableDictionary dictionary];

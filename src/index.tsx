@@ -43,6 +43,13 @@ export interface InitOptions {
   logId: string;
 }
 
+type Comment = {
+  authorId: string;
+  body: string;
+  createdAt: string;
+  id: string;
+};
+
 export interface Ticket {
   id: string;
   requesterId: number;
@@ -51,12 +58,8 @@ export interface Ticket {
   description: string;
   createdAt: string;
   updatedAt: string;
-  lastComment: {
-    authorId: string;
-    body: string;
-    createdAt: string;
-    id: string;
-  };
+  firstComment: Comment;
+  lastComment: Comment;
 }
 
 interface UserInfo extends AnonymousIdentity {
