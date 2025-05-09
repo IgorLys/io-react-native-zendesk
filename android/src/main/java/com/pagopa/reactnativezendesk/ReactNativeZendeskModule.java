@@ -61,6 +61,7 @@ import zendesk.support.requestlist.RequestListActivity;
 import java.time.format.DateTimeFormatter;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
 
 @ReactModule(name = ReactNativeZendeskModule.NAME)
 public class ReactNativeZendeskModule extends ReactContextBaseJavaModule implements ActivityEventListener {
