@@ -255,12 +255,14 @@ public void hasOpenedTickets(final Promise promise) {
                 requestMap.putDouble("requesterId", request.getRequesterId());
 
                 if (request.getCreatedAt() != null) {
-                    DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_INSTANT;
-                    requestMap.putString("createdAt", isoFormatter.format(request.getCreatedAt().toInstant()));
+                    ZonedDateTime utcDateTime = request.getCreatedAt().toInstant().atZone(ZoneOffset.UTC);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
+                    requestMap.putString("createdAt", formatter.format(utcDateTime));
                 }
                 if (request.getUpdatedAt() != null) {
-                     DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_INSTANT;
-                     requestMap.putString("updatedAt", isoFormatter.format(request.getUpdatedAt().toInstant()));
+                    ZonedDateTime utcDateTime = request.getUpdatedAt().toInstant().atZone(ZoneOffset.UTC);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z");
+                    requestMap.putString("updatedAt", formatter.format(utcDateTime));
                 }
                 if (request.getDescription() != null) {
                     requestMap.putString("description", request.getDescription());
