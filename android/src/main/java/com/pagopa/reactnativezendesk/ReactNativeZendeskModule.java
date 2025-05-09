@@ -251,10 +251,12 @@ public void hasOpenedTickets(final Promise promise) {
                 requestMap.putDouble("requesterId", request.getRequesterId());
 
                 if (request.getCreatedAt() != null) {
-                    requestMap.putString("createdAt", request.getCreatedAt().toString());
+                    DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_INSTANT;
+                    requestMap.putString("createdAt", isoFormatter.format(request.getCreatedAt().toInstant()));
                 }
                 if (request.getUpdatedAt() != null) {
-                    requestMap.putString("updatedAt", request.getUpdatedAt().toString());
+                     DateTimeFormatter isoFormatter = DateTimeFormatter.ISO_INSTANT;
+                     requestMap.putString("updatedAt", isoFormatter.format(request.getUpdatedAt().toInstant()));
                 }
                 if (request.getDescription() != null) {
                     requestMap.putString("description", request.getDescription());
