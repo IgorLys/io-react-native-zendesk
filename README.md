@@ -167,7 +167,11 @@ After you modify package, you need to update package version. You can do it in p
 To publish package, run:
 
 ```bash
-npm publish --access public
+# login into your npm account
+npm login
+
+#publish package to npm registry
+npm publish
 ```
 
 ## Contributing
