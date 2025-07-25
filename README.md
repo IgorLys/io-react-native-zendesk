@@ -1,4 +1,4 @@
-# @igorlysenko/io-react-native-zendesk
+# @intrexis/io-react-native-zendesk
 
 A react-native wrapper for Zendesk Unified SDK
 
@@ -7,7 +7,7 @@ This library is based and originally forked by https://github.com/pagopa/io-reac
 ## Installation
 
 ```sh
-yarn add @igorlysenko/io-react-native-zendesk
+yarn add @intrexis/io-react-native-zendesk
 ```
 
 #### iOS
@@ -159,6 +159,15 @@ To register your token with Zendesk call
 
 ```
 	RNZendesk.setNotificationToken(<your token>)
+```
+
+## How to publish package
+
+After you modify package, you need to update package version. You can do it in package.json -> version.
+To publish package, run:
+
+```bash
+npm publish --access public
 ```
 
 ## Contributing

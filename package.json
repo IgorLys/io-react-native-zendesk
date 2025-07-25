@@ -1,6 +1,6 @@
 {
-  "name": "@igorlysenko/io-react-native-zendesk",
-  "version": "0.3.43",
+  "name": "@intrexis/io-react-native-zendesk",
+  "version": "0.3.44",
   "description": "A react-native wrapper for Zendesk Unified SDK",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -40,14 +40,14 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/IgorLys/io-react-native-zendesk.git"
+    "url": "git+https://github.com/Intrexis/Rythmos.ReactNativeZendesk.git"
   },
-  "author": "IgorLys (https://github.com/IgorLys)",
+  "author": "Intrexis (https://github.com/Intrexis)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/IgorLys/io-react-native-zendesk/issues"
+    "url": "https://github.com/Intrexis/Rythmos.ReactNativeZendesk.git/issues"
   },
-  "homepage": "https://github.com/IgorLys/io-react-native-zendesk#readme",
+  "homepage": "https://github.com/Intrexis/Rythmos.ReactNativeZendesk.git#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
